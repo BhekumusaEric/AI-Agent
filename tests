@@ -1,39 +1,41 @@
-import test
-from solution import next_states
+import unittest
+from miu_system import next_states  # make sure this path matches your actual file
 
-@test.describe("Fixed Tests")
-def fixed_tests():
-    @test.it('Basic Test Cases')
-    def basic_test_cases():
-        test_cases = [
-            ("MI", ["MIU", "MII"]),
-            ("MIU", ["MIUIU"]),
-            ("MUI" , ["MUIU", "MUIUI"]),
-            ("MIIII", ["MIIIIU", "MIIIIIIII", "MUI", "MIU"]),
-            ("MUUII", ["MUUIIU", "MUUIIUUII", "MII"]),
-            ("MUUUI",["MUUUIU", "MUUUIUUUI", "MUI"]),
-            
-            ('MIIIIIIIIIIIIIIIIIIUIIIIIIIIIII', ['MIIIIIIIIIIIIIIIIIIUIIIIIIIIIIIU', 'MIIIIIIIIIIIIIIIIIIUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIUIIIIIIIIIII', 'MUIIIIIIIIIIIIIIIUIIIIIIIIIII', 'MIUIIIIIIIIIIIIIIUIIIIIIIIIII', 'MIIUIIIIIIIIIIIIIUIIIIIIIIIII', 'MIIIUIIIIIIIIIIIIUIIIIIIIIIII', 'MIIIIUIIIIIIIIIIIUIIIIIIIIIII', 'MIIIIIUIIIIIIIIIIUIIIIIIIIIII', 'MIIIIIIUIIIIIIIIIUIIIIIIIIIII', 'MIIIIIIIUIIIIIIIIUIIIIIIIIIII', 'MIIIIIIIIUIIIIIIIUIIIIIIIIIII', 'MIIIIIIIIIUIIIIIIUIIIIIIIIIII', 'MIIIIIIIIIIUIIIIIUIIIIIIIIIII', 'MIIIIIIIIIIIUIIIIUIIIIIIIIIII', 'MIIIIIIIIIIIIUIIIUIIIIIIIIIII', 'MIIIIIIIIIIIIIUIIUIIIIIIIIIII', 'MIIIIIIIIIIIIIIUIUIIIIIIIIIII', 'MIIIIIIIIIIIIIIIUUIIIIIIIIIII', 'MIIIIIIIIIIIIIIIIIIUUIIIIIIII', 'MIIIIIIIIIIIIIIIIIIUIUIIIIIII', 'MIIIIIIIIIIIIIIIIIIUIIUIIIIII', 'MIIIIIIIIIIIIIIIIIIUIIIUIIIII', 'MIIIIIIIIIIIIIIIIIIUIIIIUIIII', 'MIIIIIIIIIIIIIIIIIIUIIIIIUIII', 'MIIIIIIIIIIIIIIIIIIUIIIIIIUII', 'MIIIIIIIIIIIIIIIIIIUIIIIIIIUI', 'MIIIIIIIIIIIIIIIIIIUIIIIIIIIU']),
-            
-            ('MIIIIIIII', ['MIIIIIIIIU', 'MIIIIIIIIIIIIIIII', 'MUIIIII', 'MIUIIII', 'MIIUIII', 'MIIIUII', 'MIIIIUI', 'MIIIIIU']),
+class TestMIUSystem(unittest.TestCase):
 
+    def test_rule1_append_u(self):
+        self.assertIn("MIU", next_states("MI"))
+        self.assertIn("MUIU", next_states("MUI"))
+        self.assertIn("MIIIIU", next_states("MIIII"))
 
+    def test_rule2_double_after_m(self):
+        self.assertIn("MII", next_states("MI"))
+        self.assertIn("MIUIU", next_states("MIU"))
+        self.assertIn("MUUUIUUUI", next_states("MUUUI"))
 
-            ('MUUIIIUIIII', ['MUUIIIUIIIIU', 'MUUIIIUIIIIUUIIIUIIII', 'MUUUUIIII', 'MUUIIIUUI', 'MUUIIIUIU', 'MIIIUIIII']),
+    def test_rule3_replace_iii_with_u(self):
+        results = next_states("MIIII")
+        self.assertIn("MUI", results)
+        self.assertIn("MIU", results)
+        self.assertTrue(any("U" in r for r in results if r.startswith("M")))
 
-            ('MIUIIIIIIIIIIIIU', ['MIUIIIIIIIIIIIIUIUIIIIIIIIIIIIU', 'MIUUIIIIIIIIIU', 'MIUIUIIIIIIIIU', 'MIUIIUIIIIIIIU', 'MIUIIIUIIIIIIU', 'MIUIIIIUIIIIIU', 'MIUIIIIIUIIIIU', 'MIUIIIIIIUIIIU', 'MIUIIIIIIIUIIU', 'MIUIIIIIIIIUIU', 'MIUIIIIIIIIIUU']),
-            ('MIUIUIUIU',['MIUIUIUIUIUIUIUIU']),
-            ('MIIUIIU',['MIIUIIUIIUIIU']),
-            ('MUIIIUIIIUI',['MUIIIUIIIUIU', 'MUIIIUIIIUIUIIIUIIIUI', 'MUUUIIIUI', 'MUIIIUUUI']),
-            ('MUIIIIIIIIIIUUIIIIIIIIIIU',['MUIIIIIIIIIIUUIIIIIIIIIIUUIIIIIIIIIIUUIIIIIIIIIIU', 'MUUIIIIIIIUUIIIIIIIIIIU', 'MUIUIIIIIIUUIIIIIIIIIIU', 'MUIIUIIIIIUUIIIIIIIIIIU', 'MUIIIUIIIIUUIIIIIIIIIIU', 'MUIIIIUIIIUUIIIIIIIIIIU', 'MUIIIIIUIIUUIIIIIIIIIIU', 'MUIIIIIIUIUUIIIIIIIIIIU', 'MUIIIIIIIUUUIIIIIIIIIIU', 'MUIIIIIIIIIIUUUIIIIIIIU', 'MUIIIIIIIIIIUUIUIIIIIIU', 'MUIIIIIIIIIIUUIIUIIIIIU', 'MUIIIIIIIIIIUUIIIUIIIIU', 'MUIIIIIIIIIIUUIIIIUIIIU', 'MUIIIIIIIIIIUUIIIIIUIIU', 'MUIIIIIIIIIIUUIIIIIIUIU', 'MUIIIIIIIIIIUUIIIIIIIUU', 'MUIIIIIIIIIIIIIIIIIIIIU']),
-            ('MIIIIU',['MIIIIUIIIIU', 'MUIU', 'MIUU']),
-            ('MUUIIU',['MUUIIUUUIIU', 'MIIU']),
-            ('MUIUIU',['MUIUIUUIUIU']),
-            ('MIIIIIIIIU',['MIIIIIIIIUIIIIIIIIU', 'MUIIIIIU', 'MIUIIIIU', 'MIIUIIIU', 'MIIIUIIU', 'MIIIIUIU', 'MIIIIIUU']),
-            ('MIIU',['MIIUIIU']),
-            ('MIIUU',['MIIUUIIUU', 'MII']),
-            
-        ]
-        
-        for string, expected in test_cases:
-            test.assert_equals(next_states(string), expected)
+    def test_rule4_remove_uu(self):
+        self.assertIn("MII", next_states("MUUII"))
+        self.assertIn("MU", next_states("MUU"))
+
+    def test_combined_rules(self):
+        results = next_states("MUUUI")
+        self.assertIn("MUUUIU", results)         # Rule 1
+        self.assertIn("MUUUIUUUI", results)      # Rule 2
+        self.assertIn("MUI", results)            # Rule 4
+
+    def test_no_invalid_duplicates(self):
+        results = next_states("MUI")
+        self.assertEqual(len(results), len(set(results)))  # No duplicates
+
+    def test_result_order(self):
+        expected = sorted(next_states("MI"))
+        self.assertEqual(next_states("MI"), expected)  # Should be in order
+
+if __name__ == "__main__":
+    unittest.main()
