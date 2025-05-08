@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .tab-content {
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            background-color: #f8f9fa;
+        }
+        .maze-cell {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border: 1px solid #ccc;
+            margin: 1px;
+        }
+        .maze-wall {
+            background-color: black;
+        }
+        .maze-start {
+            background-color: green;
+        }
+        .maze-goal {
+            background-color: red;
+        }
+        .maze-path {
+            background-color: yellow;
+        }
+        .maze-visited {
+            background-color: lightblue;
+        }
+        .maze-empty {
+            background-color: white;
+        }
+        .maze-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        .path-step {
+            margin-bottom: 5px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loading img {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">AI Agent Interface</h1>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="miu-tab" data-bs-toggle="tab" data-bs-target="#miu" type="button" role="tab" aria-controls="miu" aria-selected="true">MIU System</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="maze-tab" data-bs-toggle="tab" data-bs-target="#maze" type="button" role="tab" aria-controls="maze" aria-selected="false">Maze Environment</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- MIU System Tab -->
+            <div class="tab-pane fade show active" id="miu" role="tabpanel" aria-labelledby="miu-tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>MIU System Configuration</h3>
+                        <form id="miu-form">
+                            <div class="mb-3">
+                                <label for="miu-initial-state" class="form-label">Initial State</label>
+                                <input type="text" class="form-control" id="miu-initial-state" value="MI" required>
+                                <div class="form-text">Must be a valid MIU string (starts with M, contains only M, I, U)</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="miu-goal-state" class="form-label">Goal State</label>
+                                <input type="text" class="form-control" id="miu-goal-state" value="MU" required>
+                                <div class="form-text">Must be a valid MIU string (starts with M, contains only M, I, U)</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="miu-algorithm" class="form-label">Search Algorithm</label>
+                                <select class="form-select" id="miu-algorithm">
+                                    <option value="bfs">Breadth-First Search (BFS)</option>
+                                    <option value="dfs">Depth-First Search (DFS)</option>
+                                    <option value="astar">A* Search</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="miu-max-iterations" class="form-label">Maximum Iterations</label>
+                                <input type="number" class="form-control" id="miu-max-iterations" value="1000" min="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Start Search</button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Next States</h3>
+                        <div class="mb-3">
+                            <label for="miu-state" class="form-label">Current State</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="miu-state" value="MI" required>
+                                <button class="btn btn-outline-secondary" type="button" id="miu-next-states-btn">Get Next States</button>
+                            </div>
+                        </div>
+                        <div id="miu-next-states-result" class="result-container">
+                            <p>Enter a state and click "Get Next States" to see possible next states.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading" id="miu-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Running search...</p>
+                </div>
+                
+                <div id="miu-search-result" class="result-container mt-4" style="display: none;">
+                    <h3>Search Results</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="miu-result-info"></div>
+                            <div id="miu-path-container">
+                                <h4>Path</h4>
+                                <div id="miu-path"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Search Graph</h4>
+                            <div id="miu-graph-container" class="text-center">
+                                <img id="miu-graph" class="img-fluid" src="" alt="MIU Search Graph">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Maze Environment Tab -->
+            <div class="tab-pane fade" id="maze" role="tabpanel" aria-labelledby="maze-tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Maze Configuration</h3>
+                        <form id="maze-form">
+                            <div class="mb-3">
+                                <label for="maze-width" class="form-label">Width</label>
+                                <input type="number" class="form-control" id="maze-width" value="10" min="3" max="20" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maze-height" class="form-label">Height</label>
+                                <input type="number" class="form-control" id="maze-height" value="10" min="3" max="20" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maze-wall-prob" class="form-label">Wall Probability</label>
+                                <input type="number" class="form-control" id="maze-wall-prob" value="0.3" min="0" max="0.5" step="0.05" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maze-seed" class="form-label">Random Seed</label>
+                                <input type="number" class="form-control" id="maze-seed" value="42" min="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Generate Maze</button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Search Configuration</h3>
+                        <form id="maze-search-form">
+                            <div class="mb-3">
+                                <label for="maze-algorithm" class="form-label">Search Algorithm</label>
+                                <select class="form-select" id="maze-algorithm">
+                                    <option value="bfs">Breadth-First Search (BFS)</option>
+                                    <option value="dfs">Depth-First Search (DFS)</option>
+                                    <option value="astar" selected>A* Search</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary" disabled>Start Search</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="loading" id="maze-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Generating maze...</p>
+                </div>
+                
+                <div id="maze-result" class="result-container mt-4" style="display: none;">
+                    <h3>Maze</h3>
+                    <div class="text-center">
+                        <img id="maze-image" class="img-fluid" src="" alt="Maze">
+                    </div>
+                </div>
+                
+                <div class="loading" id="maze-search-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Running search...</p>
+                </div>
+                
+                <div id="maze-search-result" class="result-container mt-4" style="display: none;">
+                    <h3>Search Results</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="maze-result-info"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Solution Path</h4>
+                            <div id="maze-path"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <img id="maze-solution-image" class="img-fluid" src="" alt="Maze Solution">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // MIU System - Get Next States
+            $('#miu-next-states-btn').click(function() {
+                const state = $('#miu-state').val();
+                
+                if (!state) {
+                    alert('Please enter a state');
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/miu/next_states',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ state: state }),
+                    success: function(response) {
+                        if (response.error) {
+                            $('#miu-next-states-result').html(`<div class="alert alert-danger">${response.error}</div>`);
+                            return;
+                        }
+                        
+                        const nextStates = response.next_states;
+                        let html = '<h4>Next States:</h4>';
+                        
+                        if (nextStates.length === 0) {
+                            html += '<p>No next states available.</p>';
+                        } else {
+                            html += '<ul>';
+                            nextStates.forEach(function(nextState) {
+                                html += `<li>${nextState}</li>`;
+                            });
+                            html += '</ul>';
+                        }
+                        
+                        $('#miu-next-states-result').html(html);
+                    },
+                    error: function() {
+                        $('#miu-next-states-result').html('<div class="alert alert-danger">Error fetching next states</div>');
+                    }
+                });
+            });
+            
+            // MIU System - Search
+            $('#miu-form').submit(function(e) {
+                e.preventDefault();
+                
+                const initialState = $('#miu-initial-state').val();
+                const goalState = $('#miu-goal-state').val();
+                const algorithm = $('#miu-algorithm').val();
+                const maxIterations = $('#miu-max-iterations').val();
+                
+                if (!initialState || !goalState) {
+                    alert('Please enter initial and goal states');
+                    return;
+                }
+                
+                // Show loading indicator
+                $('#miu-loading').show();
+                $('#miu-search-result').hide();
+                
+                $.ajax({
+                    url: '/api/miu/search',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        initial_state: initialState,
+                        goal_state: goalState,
+                        algorithm: algorithm,
+                        max_iterations: maxIterations
+                    }),
+                    success: function(response) {
+                        // Hide loading indicator
+                        $('#miu-loading').hide();
+                        
+                        if (response.error) {
+                            alert(response.error);
+                            return;
+                        }
+                        
+                        // Display results
+                        let resultInfo = `<p><strong>Iterations:</strong> ${response.iterations}</p>`;
+                        resultInfo += `<p><strong>Visited Nodes:</strong> ${response.visited_nodes_count}</p>`;
+                        
+                        if (response.solution_found) {
+                            resultInfo += `<p><strong>Solution Found:</strong> Yes</p>`;
+                            resultInfo += `<p><strong>Path Length:</strong> ${response.path_length} steps</p>`;
+                            
+                            let pathHtml = '';
+                            response.path.forEach(function(step) {
+                                pathHtml += `<div class="path-step">`;
+                                pathHtml += `<strong>${step.step}.</strong> `;
+                                pathHtml += `${step.action} → ${step.state}`;
+                                pathHtml += `</div>`;
+                            });
+                            
+                            $('#miu-path').html(pathHtml);
+                            $('#miu-path-container').show();
+                        } else {
+                            resultInfo += `<p><strong>Solution Found:</strong> No</p>`;
+                            $('#miu-path-container').hide();
+                        }
+                        
+                        $('#miu-result-info').html(resultInfo);
+                        
+                        // Display graph
+                        if (response.graph_image) {
+                            $('#miu-graph').attr('src', response.graph_image);
+                            $('#miu-graph-container').show();
+                        } else {
+                            $('#miu-graph-container').hide();
+                        }
+                        
+                        $('#miu-search-result').show();
+                    },
+                    error: function() {
+                        $('#miu-loading').hide();
+                        alert('Error running search');
+                    }
+                });
+            });
+            
+            // Maze Environment - Generate Maze
+            $('#maze-form').submit(function(e) {
+                e.preventDefault();
+                
+                const width = $('#maze-width').val();
+                const height = $('#maze-height').val();
+                const wallProb = $('#maze-wall-prob').val();
+                const seed = $('#maze-seed').val();
+                
+                // Show loading indicator
+                $('#maze-loading').show();
+                $('#maze-result').hide();
+                $('#maze-search-result').hide();
+                
+                $.ajax({
+                    url: '/api/maze/generate',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        width: width,
+                        height: height,
+                        wall_prob: wallProb,
+                        seed: seed
+                    }),
+                    success: function(response) {
+                        // Hide loading indicator
+                        $('#maze-loading').hide();
+                        
+                        if (response.error) {
+                            alert(response.error);
+                            return;
+                        }
+                        
+                        // Store maze data for search
+                        window.mazeData = response;
+                        
+                        // Display maze
+                        if (response.maze_image) {
+                            $('#maze-image').attr('src', response.maze_image);
+                            $('#maze-result').show();
+                        }
+                        
+                        // Enable search button
+                        $('#maze-search-form button').prop('disabled', false);
+                    },
+                    error: function() {
+                        $('#maze-loading').hide();
+                        alert('Error generating maze');
+                    }
+                });
+            });
+            
+            // Maze Environment - Search
+            $('#maze-search-form').submit(function(e) {
+                e.preventDefault();
+                
+                if (!window.mazeData) {
+                    alert('Please generate a maze first');
+                    return;
+                }
+                
+                const algorithm = $('#maze-algorithm').val();
+                
+                // Show loading indicator
+                $('#maze-search-loading').show();
+                $('#maze-search-result').hide();
+                
+                $.ajax({
+                    url: '/api/maze/search',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        algorithm: algorithm
+                    }),
+                    success: function(response) {
+                        // Hide loading indicator
+                        $('#maze-search-loading').hide();
+                        
+                        if (response.error) {
+                            alert(response.error);
+                            return;
+                        }
+                        
+                        // Display results
+                        let resultInfo = `<p><strong>Iterations:</strong> ${response.iterations}</p>`;
+                        resultInfo += `<p><strong>Visited Nodes:</strong> ${response.visited_nodes_count}</p>`;
+                        
+                        if (response.solution_found) {
+                            resultInfo += `<p><strong>Solution Found:</strong> Yes</p>`;
+                            resultInfo += `<p><strong>Path Length:</strong> ${response.path_length} steps</p>`;
+                            
+                            // Display first few steps of the path
+                            let pathHtml = '';
+                            const maxStepsToShow = 5;
+                            const stepsToShow = Math.min(maxStepsToShow, response.path.length);
+                            
+                            for (let i = 0; i < stepsToShow; i++) {
+                                const step = response.path[i];
+                                pathHtml += `<div class="path-step">`;
+                                pathHtml += `<strong>${step.step}.</strong> `;
+                                pathHtml += `${step.action} → (${step.state[0]}, ${step.state[1]})`;
+                                pathHtml += `</div>`;
+                            }
+                            
+                            if (response.path.length > maxStepsToShow) {
+                                pathHtml += `<div class="path-step">... (${response.path.length - maxStepsToShow} more steps)</div>`;
+                            }
+                            
+                            $('#maze-path').html(pathHtml);
+                        } else {
+                            resultInfo += `<p><strong>Solution Found:</strong> No</p>`;
+                            $('#maze-path').html('<p>No solution found.</p>');
+                        }
+                        
+                        $('#maze-result-info').html(resultInfo);
+                        
+                        // Display solution image
+                        if (response.maze_solution_image) {
+                            $('#maze-solution-image').attr('src', response.maze_solution_image);
+                        }
+                        
+                        $('#maze-search-result').show();
+                    },
+                    error: function() {
+                        $('#maze-search-loading').hide();
+                        alert('Error running search');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

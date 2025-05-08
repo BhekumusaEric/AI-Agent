@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .tab-content {
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            background-color: #f8f9fa;
+        }
+        .maze-cell {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border: 1px solid #ccc;
+            margin: 1px;
+        }
+        .maze-wall {
+            background-color: black;
+        }
+        .maze-start {
+            background-color: green;
+        }
+        .maze-goal {
+            background-color: red;
+        }
+        .maze-path {
+            background-color: yellow;
+        }
+        .maze-visited {
+            background-color: lightblue;
+        }
+        .maze-empty {
+            background-color: white;
+        }
+        .maze-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        .path-step {
+            margin-bottom: 5px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loading img {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">AI Agent Interface</h1>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="miu-tab" data-bs-toggle="tab" data-bs-target="#miu" type="button" role="tab" aria-controls="miu" aria-selected="true">MIU System</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="maze-tab" data-bs-toggle="tab" data-bs-target="#maze" type="button" role="tab" aria-controls="maze" aria-selected="false">Maze Environment</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- MIU System Tab -->
+            <div class="tab-pane fade show active" id="miu" role="tabpanel" aria-labelledby="miu-tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>MIU System Configuration</h3>
+                        <form id="miu-form">
+                            <div class="mb-3">
+                                <label for="miu-initial-state" class="form-label">Initial State</label>
+                                <input type="text" class="form-control" id="miu-initial-state" value="MI" required>
+                                <div class="form-text">Must be a valid MIU string (starts with M, contains only M, I, U)</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="miu-goal-state" class="form-label">Goal State</label>
+                                <input type="text" class="form-control" id="miu-goal-state" value="MU" required>
+                                <div class="form-text">Must be a valid MIU string (starts with M, contains only M, I, U)</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="miu-algorithm" class="form-label">Search Algorithm</label>
+                                <select class="form-select" id="miu-algorithm">
+                                    <option value="bfs">Breadth-First Search (BFS)</option>
+                                    <option value="dfs">Depth-First Search (DFS)</option>
+                                    <option value="astar">A* Search</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="miu-max-iterations" class="form-label">Maximum Iterations</label>
+                                <input type="number" class="form-control" id="miu-max-iterations" value="1000" min="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Start Search</button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Next States</h3>
+                        <div class="mb-3">
+                            <label for="miu-state" class="form-label">Current State</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="miu-state" value="MI" required>
+                                <button class="btn btn-outline-secondary" type="button" id="miu-next-states-btn">Get Next States</button>
+                            </div>
+                        </div>
+                        <div id="miu-next-states-result" class="result-container">
+                            <p>Enter a state and click "Get Next States" to see possible next states.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading" id="miu-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Running search...</p>
+                </div>
+                
+                <div id="miu-search-result" class="result-container mt-4" style="display: none;">
+                    <h3>Search Results</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="miu-result-info"></div>
+                            <div id="miu-path-container">
+                                <h4>Path</h4>
+                                <div id="miu-path"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Search Graph</h4>
+                            <div id="miu-graph-container" class="text-center">
+                                <img id="miu-graph" class="img-fluid" src="" alt="MIU Search Graph">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Maze Environment Tab -->
+            <div class="tab-pane fade" id="maze" role="tabpanel" aria-labelledby="maze-tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Maze Configuration</h3>
+                        <form id="maze-form">
+                            <div class="mb-3">
+                                <label for="maze-width" class="form-label">Width</label>
+                                <input type="number" class="form-control" id="maze-width" value="10" min="3" max="20" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maze-height" class="form-label">Height</label>
+                                <input type="number" class="form-control" id="maze-height" value="10" min="3" max="20" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maze-wall-prob" class="form-label">Wall Probability</label>
+                                <input type="number" class="form-control" id="maze-wall-prob" value="0.3" min="0" max="0.5" step="0.05" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maze-seed" class="form-label">Random Seed</label>
+                                <input type="number" class="form-control" id="maze-seed" value="42" min="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Generate Maze</button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Search Configuration</h3>
+                        <form id="maze-search-form">
+                            <div class="mb-3">
+                                <label for="maze-algorithm" class="form-label">Search Algorithm</label>
+                                <select class="form-select" id="maze-algorithm">
+                                    <option value="bfs">Breadth-First Search (BFS)</option>
+                                    <option value="dfs">Depth-First Search (DFS)</option>
+                                    <option value="astar" selected>A* Search</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary" disabled>Start Search</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="loading" id="maze-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Generating maze...</p>
+                </div>
+                
+                <div id="maze-result" class="result-container mt-4" style="display: none;">
+                    <h3>Maze</h3>
+                    <div class="text-center">
+                        <img id="maze-image" class="img-fluid" src="" alt="Maze">
+                    </div>
+                </div>
+                
+                <div class="loading" id="maze-search-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Running search...</p>
+                </div>
+                
+                <div id="maze-search-result" class="result-container mt-4" style="display: none;">
+                    <h3>Search Results</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="maze-result-info"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Solution Path</h4>
+                            <div id="maze-path"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <img id="maze-solution-image" class="img-fluid" src="" alt="Maze Solution">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>

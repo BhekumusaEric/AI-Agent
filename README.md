@@ -84,10 +84,10 @@ This function is the foundation upon which you'll build more advanced search str
 
 This enhanced version of the AI Agent includes:
 
-1. **Command-Line Interface (CLI)**: A user-friendly interface that allows you to:
-   - Configure search parameters
-   - Interact with different environments
-   - View search results in text format
+1. **Multiple Interfaces**:
+   - **Web Interface**: A browser-based GUI for easy interaction
+   - **Command-Line Interface (CLI)**: A text-based interface for terminal users
+   - Both interfaces allow you to configure parameters, interact with environments, and visualize results
 
 2. **Multiple Search Algorithms**:
    - Breadth-First Search (BFS)
@@ -120,18 +120,27 @@ This enhanced version of the AI Agent includes:
    python3 main.py
    ```
 
-4. Use the CLI to:
+4. Run the web interface:
+   ```
+   python3 web_interface.py
+   ```
+   Then open your browser and navigate to http://localhost:8000
+
+5. Use either interface to:
    - Select an environment (MIU System or Maze)
    - Configure parameters
    - Choose a search algorithm
-   - Start the search and view the results
+   - Start the search and visualize the results
 
 ## Project Structure
 
-- `main.py`: Entry point for the application
+- `main.py`: Entry point for the CLI application
+- `web_interface.py`: Entry point for the web interface
 - `cli.py`: Command-line interface implementation
 - `demo.py`: Demonstration script with predefined examples
 - `miu_system.py`: Implementation of the MIU formal system
 - `search.py`: Search algorithms (BFS, DFS, A*)
 - `miu_problem.py`: MIU problem definition
 - `maze_environment.py`: Maze environment implementation
+- `templates/`: HTML templates for the web interface
+- `static/`: Static files (JavaScript, CSS) for the web interface
