@@ -1,5 +1,5 @@
 # AI-Agent
-# Build your Own AI Agent: Part 1
+# Enhanced AI Agent with GUI
 Welcome to the first installment in our series on [Artificial Intelligence], where you'll build your very own AI agent! In this series, you'll learn how AI agents work and gradually develop your agent using the concepts and techniques presented here.
 
 AI agents are practical implementations of AI principles, designed to interact with environments and take actions autonomously.
@@ -79,3 +79,59 @@ next_states("MIIII") → ["MIIIIU", "MIIIIIIII", "MUI", "MIU"]
 next_states("MUUII") → ["MUUIIU", "MUUIIUUII", "MII"]
 next_states("MUUUI") → ["MUUUIU", "MUUUIUUUI", "MUI"]
 This function is the foundation upon which you'll build more advanced search strategies in future katas. It lets your AI agent explore the MIU search space incrementally, without needing to load all possible states into memory at once.
+
+## Enhanced AI Agent Features
+
+This enhanced version of the AI Agent includes:
+
+1. **Command-Line Interface (CLI)**: A user-friendly interface that allows you to:
+   - Configure search parameters
+   - Interact with different environments
+   - View search results in text format
+
+2. **Multiple Search Algorithms**:
+   - Breadth-First Search (BFS)
+   - Depth-First Search (DFS)
+   - A* Search with heuristics
+
+3. **Multiple Environments**:
+   - MIU System: Explore string transformations
+   - Maze Environment: Navigate through randomly generated mazes
+
+4. **Visualization Tools**:
+   - Graph visualization for the MIU system
+   - Grid visualization for mazes
+   - Path highlighting for solutions
+
+## Getting Started
+
+1. Install the required dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. Run the demo to see the AI agent in action:
+   ```
+   python3 demo.py
+   ```
+
+3. Run the interactive CLI:
+   ```
+   python3 main.py
+   ```
+
+4. Use the CLI to:
+   - Select an environment (MIU System or Maze)
+   - Configure parameters
+   - Choose a search algorithm
+   - Start the search and view the results
+
+## Project Structure
+
+- `main.py`: Entry point for the application
+- `cli.py`: Command-line interface implementation
+- `demo.py`: Demonstration script with predefined examples
+- `miu_system.py`: Implementation of the MIU formal system
+- `search.py`: Search algorithms (BFS, DFS, A*)
+- `miu_problem.py`: MIU problem definition
+- `maze_environment.py`: Maze environment implementation
